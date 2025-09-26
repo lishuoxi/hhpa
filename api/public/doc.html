@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MQiPay 接口对接文档</title>
+  <style>
+    :root {
+      --fg: #0f172a;
+      --muted: #475569;
+      --bg: #ffffff;
+      --primary: #3b82f6;
+      --border: #e2e8f0;
+      --code-bg: #0b1020;
+      --code-fg: #e6edf3;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; background: var(--bg); color: var(--fg); font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji"; }
+    .container { max-width: 980px; margin: 0 auto; padding: 24px; }
+    header { margin-bottom: 24px; }
+    h1 { font-size: 28px; margin: 0 0 8px; }
+    .subtitle { color: var(--muted); margin: 0 0 16px; }
+    nav.toc { border: 1px solid var(--border); border-radius: 12px; padding: 12px 16px; background: #f8fafc; margin: 16px 0 24px; }
+    nav.toc a { color: var(--primary); text-decoration: none; margin-right: 16px; }
+    h2 { font-size: 22px; margin-top: 32px; margin-bottom: 8px; }
+    h3 { font-size: 18px; margin-top: 18px; margin-bottom: 6px; }
+    p { line-height: 1.7; }
+    code.inline { padding: 2px 6px; background: #f1f5f9; border: 1px solid var(--border); border-radius: 6px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-size: 90%; }
+    pre { background: var(--code-bg); color: var(--code-fg); border-radius: 12px; padding: 14px; overflow: auto; border: 1px solid #111827; }
+    pre code { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-size: 13px; }
+    table { width: 100%; border-collapse: collapse; margin: 10px 0 16px; }
+    th, td { text-align: left; padding: 10px 8px; border-bottom: 1px solid var(--border); vertical-align: top; }
+    th { background: #f8fafc; font-weight: 600; }
+    .note { background: #f1f5f9; border: 1px dashed var(--border); padding: 10px 12px; border-radius: 10px; color: var(--muted); }
+    .kbd { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; background: #f1f5f9; padding: 2px 6px; border-radius: 6px; border: 1px solid var(--border); font-size: 90%; }
+    footer { margin-top: 40px; color: var(--muted); font-size: 14px; }
+    .pill { display: inline-block; padding: 2px 8px; border-radius: 999px; background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; font-size: 12px; margin-left: 8px; vertical-align: middle; }
+    .endpoint { display: inline-block; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; background: #eef2ff; color: #3730a3; border: 1px solid #c7d2fe; padding: 2px 8px; border-radius: 8px; }
+    .method { display: inline-block; padding: 2px 8px; border-radius: 8px; font-weight: 700; border: 1px solid; margin-right: 6px; font-size: 12px; }
+    .post { color: #065f46; border-color: #a7f3d0; background: #ecfdf5; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>对接文档 <span class="pill">Content-Type: application/json</span></h1>
+      <p class="subtitle">不管是商户请求本平台，还是本平台回调商户订单状态，其 HTTP 报文的 <span class="kbd">Content-Type</span> 都为 <code class="inline">application/json</code>。</p>
+    </header>
+
+    <section>
+      <h2>返回数据的基本格式</h2>
+      <p>所有接口统一返回结构如下（<code class="inline">data</code> 为有效载荷）：</p>
+      <pre><code>{
+    code: 0,               // 0 代表正常, 其它值代表有错误
+    message: "返回信息",    // 返回的文字信息
+    data: {}               // 返回的数据
+}</code></pre>
+      <p class="note">下面对接口进行说明时，返回示例均仅展示 <code class="inline">data</code> 字段的值。</p>
+    </section>
+
+    <nav class="toc">
+      <strong>目录：</strong>
+      <a href="#create">提交订单</a>
+      <a href="#query">查询订单</a>
+      <a href="#callback">订单回调</a>
+      <a href="#signature">签名算法</a>
+    </nav>
+
+    <section id="create">
+      <h2>提交订单</h2>
+      <p>
+        <span class="method post">POST</span>
+        <span class="endpoint">http://api.henghaochi.com/trade/create</span>
+      </p>
+
+      <h3>数据格式</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>名称</th>
+            <th>类型</th>
+            <th>是否必须</th>
+            <th>是否参与签名</th>
+            <th>说明</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>merchant_id</td><td>string</td><td>是</td><td>是</td><td>商户号, 如: 2024010101</td></tr>
+          <tr><td>out_trade_id</td><td>string</td><td>是</td><td>是</td><td>商户订单号, 必须唯一, 不能重复提交</td></tr>
+          <tr><td>amount</td><td>double</td><td>是</td><td>是</td><td>金额, 两位小数, 如: 100.00</td></tr>
+          <tr><td>pay_type</td><td>string</td><td>是</td><td>是</td><td>通道编码, 如: alipay_h5</td></tr>
+          <tr><td>timestamp</td><td>long</td><td>是</td><td>是</td><td>十位 UTC 时间戳, 如: 1714599106</td></tr>
+          <tr><td>notify_url</td><td>string</td><td>是</td><td>是</td><td>回调地址</td></tr>
+          <tr><td>return_url</td><td>string</td><td>否</td><td>是</td><td>同步回调地址</td></tr>
+          <tr><td>sign</td><td>string</td><td>是</td><td>否</td><td>签名</td></tr>
+        </tbody>
+      </table>
+
+      <h3>请求示例</h3>
+      <pre><code>{
+    merchant_id: 2024010101,
+    out_trade_id: '',
+    amount: 100.00,
+    pay_type: 'alipay_h5',
+    timestamp: 1714599106,
+    notify_url: '',
+    return_url: '',
+    sign: ''
+}</code></pre>
+
+      <h3>返回示例 <span class="pill">DATA</span></h3>
+      <pre><code>{
+    trade_id: '',
+    out_trade_id: '',
+    amount: 100.00,
+    pay_url: '',
+    sign: ''
+}</code></pre>
+    </section>
+
+    <section id="query">
+      <h2>查询订单</h2>
+      <p>
+        <span class="method post">POST</span>
+        <span class="endpoint">http://api.henghaochi.com/trade/query</span>
+      </p>
+
+      <h3>数据格式</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>名称</th>
+            <th>类型</th>
+            <th>是否必须</th>
+            <th>是否参与签名</th>
+            <th>说明</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>merchant_id</td><td>string</td><td>是</td><td>是</td><td>商户号, 如: 2024010101</td></tr>
+          <tr><td>out_trade_id</td><td>string</td><td>是</td><td>是</td><td>商户订单号</td></tr>
+          <tr><td>timestamp</td><td>long</td><td>是</td><td>是</td><td>十位 UTC 时间戳, 如: 1714599106</td></tr>
+          <tr><td>sign</td><td>string</td><td>是</td><td>否</td><td>签名</td></tr>
+        </tbody>
+      </table>
+
+      <h3>请求示例</h3>
+      <pre><code>{
+    merchant_id: '',
+    out_trade_id: '',
+    timestamp: '',
+    sign: ''
+}</code></pre>
+
+      <h3>返回示例 <span class="pill">DATA</span></h3>
+      <pre><code>{
+    status: '',        // 支付完成, 支付失败, 等待支付
+    trade_id: '',      // 订单号
+    out_trade_id: '',  // 商户订单号
+    amount: '',        // 金额
+    timestamp: '',     // 时间戳
+    sign: ''
+}</code></pre>
+    </section>
+
+    <section id="callback">
+      <h2>订单回调</h2>
+
+      <h3>回调数据格式</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>名称</th>
+            <th>类型</th>
+            <th>是否必须</th>
+            <th>是否参与签名</th>
+            <th>说明</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>merchant_id</td><td>string</td><td>是</td><td>是</td><td>商户号, 如: 2024010101</td></tr>
+          <tr><td>out_trade_id</td><td>string</td><td>是</td><td>是</td><td>商户订单号, 必须唯一, 不能重复提交</td></tr>
+          <tr><td>amount</td><td>double</td><td>是</td><td>是</td><td>金额, 两位小数, 如: 100.00</td></tr>
+          <tr><td>timestamp</td><td>long</td><td>是</td><td>是</td><td>十位 UTC 时间戳, 如: 1714599106</td></tr>
+          <tr><td>status</td><td>string</td><td>是</td><td>是</td><td>状态: 支付完成</td></tr>
+          <tr><td>sign</td><td>string</td><td>是</td><td>否</td><td>签名</td></tr>
+        </tbody>
+      </table>
+
+      <p class="note">订单成功后，会通过 <code class="inline">notify_url</code> 通知商户。处理完成后请返回字符串 <code class="inline">SUCCESS</code>。若收不到 <code class="inline">SUCCESS</code>，系统会进行 5 次重试或直至收到为止。</p>
+
+      <h3>回调示例负载</h3>
+      <pre><code>{
+	merchant_id: '',
+	out_trade_id: '',
+	amount: 100.00,
+	timestamp: 123,
+	status: '支付完成', // 支付完成
+	sign: ''
+}</code></pre>
+    </section>
+
+    <section id="signature">
+      <h2>签名算法</h2>
+
+      <h3>签名步骤说明</h3>
+      <ol>
+        <li>取 API 所需的加密字段（必填 + 可选传参数）组成字典 <code class="inline">m</code>：<br> <code class="inline">{k1: v1, k2: v2, ..., kn: vn}</code></li>
+        <li>按 key ASCII 升序排序该字典。</li>
+        <li>按 QueryString 方式拼接：<br> <code class="inline">str = k1=v1&k2=v2&...&kn=vn</code></li>
+        <li>在末尾追加密钥：<br> <code class="inline">str2 = str + "&amp;key=密钥"</code></li>
+        <li>对 <code class="inline">str2</code> 做 MD5，取小写，得到 <code class="inline">sign</code>。</li>
+      </ol>
+
+      <h3>PHP 参考代码</h3>
+      <pre><code><?php
+public function sign($data, $secret)
+{
+    if (isset($data['sign'])) unset($data['sign']);
+    $signStr = '';
+    ksort($data);
+    foreach ($data as $key => $value) {
+        if ($value !== '' && $value !== null) {
+            $signStr .= $key . '=' . $value . '&';
+        }
+    }
+    $signStr .= 'key=' . $secret;
+
+    return strtolower(md5($signStr));
+}
+?></code></pre>
+    </section>
+
+    <footer>
+      <p>© DD支付 文档示例 · 本页仅展示接口格式与示例负载。</p>
+    </footer>
+  </div>
+</body>
+</html>
