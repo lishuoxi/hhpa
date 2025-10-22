@@ -157,31 +157,38 @@
             </el-form-item>
           </template>
 
-          <template v-if="form.account_type_id==7">
-            <el-form-item label="支付宝appid:" prop="param1">
-             <el-input
-               clearable
-               :maxlength="120"
-               v-model="form.param1"
-               placeholder="请输入支付宝appid"
-             />
+          <template v-if="form.account_type_id==6">
+            <el-form-item label="支付宝二维码:" prop="param1">
+              <el-row>
+                  <el-col :span="4" >
+                      <img :src="form.param1" width="60px" height="60px" />
+                  </el-col>
+                  <el-col :span="10">
+                        <el-upload
+                          drag
+                          ref="upload"
+                          class="ele-block"
+                          v-loading="loading"
+                          accept=".jpg,.png"
+                          :show-file-list="true"
+                          :before-upload="doUpload1"
+                          :auto-upload="true"
+                          :multiple = 'false'
+                        >
+                      <i class="el-icon-upload"></i>
+                      <div class="el-upload__text">将文件拖到此处, 或 <em>点击上传</em></div>
+                      <div class="el-upload__tip ele-text-center" slot="tip">
+                          <span>只能上传png、jpg文件 </span>
+                      </div>
+                    </el-upload>
+                  </el-col>
+              </el-row>
             </el-form-item>
 
-            <el-form-item label="支付宝公钥:" prop="param4">
+            <el-form-item label="二维码链接:" prop="param2">
               <el-input
-                v-model="form.param4"
-                placeholder="请输入支付宝公钥"
-                :rows="4"
-                type="textarea"
-              />
-            </el-form-item>
-
-            <el-form-item label="支付宝私钥:" prop="param5">
-              <el-input
-                v-model="form.param5"
-                placeholder="请输入支付宝私钥"
-                :rows="4"
-                type="textarea"
+                v-model="form.param2"
+                placeholder="请输入二维码链接"
               />
             </el-form-item>
           </template>
@@ -403,7 +410,8 @@
               this.$message.success('上传成功');
 
              this.form = { ...this.form };
-             this.form["param"+num] = data.realpath;
+             this.form["param"+num] = data.url;
+             //this.form["param"+num] = data.realpath;
           })
           .catch((e) => {
               this.loading = false;

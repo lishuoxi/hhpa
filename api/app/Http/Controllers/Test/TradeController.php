@@ -18,6 +18,8 @@ class TradeController extends Controller
 	function create(Request $request)
 	{
         $url = route('trade_create');
+		$merchant_id = $request->get('merchant_id', 2);
+		$channel_code = $request->get('merchant_code', 'alipay_qrcode');
 
         $merchant = User::find(2);
 

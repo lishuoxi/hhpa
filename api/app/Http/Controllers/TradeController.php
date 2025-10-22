@@ -70,6 +70,8 @@ class TradeController extends Controller
             return $this->fail('错误03:通道不存在或限额不正确');
         }
 
+        $amount=$request->amount;
+
         // 通道限额
         if(!empty($channel->amount_max_limit) && $amount>$channel->amount_max_limit){
             return $this->fail('错误04:订单金额超出限额');
@@ -126,8 +128,7 @@ class TradeController extends Controller
         $datas = [
             'trade_id'     => $trade->trade_id,
             'out_trade_id' => $trade->out_trade_id,
-            'amount' 	   => $trade->amount,
-            //'type'         => 'direct_url',
+            'type'         => 'direct_url',
             'pay_url'      => $trade->pay_url,
         ];
 
@@ -141,29 +142,34 @@ class TradeController extends Controller
     function query(Request $request)
     {
 		$validator = Validator::make(request()->all(), [  
-			'merchant_id' 	=> 'required',
-			'out_trade_id'  => 'required',
-			'timestamp'   	=> 'required',
-            'sign'        	=> 'required',
+			'merchant_id' => 'required',
+			//'trade_id'    => 'required',
+			'timestamp'   => 'required',
+            'sign'        => 'required',
 		], [
-			'merchant_id.required' 		=> '商户号不能为空',
-			'out_trade_id.required'    	=> '订单号不能为空',
-			'timestamp.required'   		=> '时间戳不能为空',
-			'sign.required'        		=> '签名不能为空',
+			'merchant_id.required' => '商户号不能为空',
+			//'trade_id.required'    => '订单号不能为空',
+			'timestamp.required'   => '时间戳不能为空',
+			'sign.required'        => '签名不能为空',
 		]);
 
 		if($validator->fails()){
 			return $this->fail($validator->errors()->first());
 		}
 
-        //$trade = Trade::where('trade_id', $request->trade_id)->first();
-
-        //if(empty($trade)){
+	if(!empty($request->trade_id)){
+		$trade = Trade::where('trade_id', $request->trade_id)->first();
+	}
+	else if(!empty($request->out_trade_id)){
 		$trade = Trade::where('out_trade_id', $request->out_trade_id)->first();
+	}
+
+        if(empty($trade)){
+		$trade = Trade::where('out_trade_id', $request->trade_id)->first();
 		if(empty($trade)){
-			return $this->fail('订单不存在');
+		    return $this->fail('订单不存在');
 		}
-        //}
+        }
 
         $merchant = User::where('id', $trade->merchant_id)->first();
         if(empty($merchant)){
@@ -176,7 +182,16 @@ class TradeController extends Controller
             return $this->fail('错误02:签名错误');
         }
 		
+		$statuses = [
+			'等待支付' => -1,
+			'支付完成' => 1,
+			'支付失败' => 2,
+		];
+		
 		$status = $trade->status;
+		if($trade->merchant_id == 11){
+			$status = $statuses[$status];
+		}
 
         $datas = [
             'status'       => $status,

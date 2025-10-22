@@ -58,14 +58,38 @@ class IndexController extends Controller
 
     }
 
+
+    function pay_nofity(Request $request){
+        $id=$request->input('id');
+    }
+
     function test(Request $request)
 	{
-		//$trade = Trade::where('trade_id', 'TR2519104628725')->first();
-		$trade = Trade::where('trade_id', 'TR2521110767400')->first();
+		$merchant_id = 12;
+		$merchant_id = 12;
+		$channel_id = 2;
 		
+		$user = User::find($merchant_id);
+		dump($user->username);
+		
+		$channel = Channel::find($channel_id);
+		dump($channel->name);
+		
+		//AccountQueue::create(12, 3);
+		AccountQueue::show($channel_id, $merchant_id);
+		
+		return;
+/*
+Log::info('123');
+Log::info(time());
+return time();
+*/
+		$trade=Trade::find(143);
 		TradeService::sendNotify($trade);
-		
+
+
 		return 'test2';
+
     }
 
     function test2()

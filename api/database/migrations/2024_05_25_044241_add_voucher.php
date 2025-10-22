@@ -15,7 +15,7 @@ return new class extends Migration
             $table->string('voucher')->default('');
             $table->integer('account_owner_id')->default(0);
             $table->timestamp('received_at')->nullable();
-            $table->enum('receive_status', ['待接单', '待提交', '已提交'])->nullable()->default('');
+            $table->enum('receive_status', ['待接单', '待提交', '已提交']);
         });
     }
 

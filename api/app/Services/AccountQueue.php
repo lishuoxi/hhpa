@@ -53,7 +53,7 @@ class AccountQueue
         $name = self::getQueueName($channel_id, $merchant_id);
 
         if(!$force){
-            $lock = new RedisLock('kk_'.$name, 600);
+            $lock = new RedisLock('kk_'.$name, 6000);
             //  十分钟一次
             if(!$lock->acquire()){
                 return;

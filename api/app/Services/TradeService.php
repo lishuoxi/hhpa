@@ -23,9 +23,9 @@ class TradeService
    static function doPay($trade, $channel)
    {
        $default_return = [
-           'account_id'       => 0,
-           'account_owner_id' => 0,
-           'pay_url'    => route('trade_detail', ['trade_id'=>$trade->trade_id]),
+           'account_id'       	=> 0,
+           'account_owner_id' 	=> 0,
+           'pay_url'    		=> route('trade_detail', ['trade_id'=>$trade->trade_id]),
            //'pay_url'          => ''
        ];
 
