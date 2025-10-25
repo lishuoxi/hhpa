@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="ele-body">
     <el-card shadow="never">
       <!-- 搜索表单 -->
@@ -98,12 +98,12 @@
     >
       <div style="text-align:center;">
         <img v-if="loginQrContent" :src="qrImage(loginQrContent)" width="180" height="180" />
-        <div v-else class="ele-text-center">加载中..</div>
+        <div v-else class=" ele-text-center\>加载中..</div>
       </div>
       <div slot="footer">
         <el-button @click="showLoginQr = false">关闭</el-button>
-        <el-button type="primary" :loading="confirmLoading" @click="confirmLogin">确认已登录</el-button>
-      </div>
+ <el-button @click=\closeLoginQr\>关闭</el-button>
+ <el-button type=\primary\ :loading=\confirmLoading\ @click=\confirmLogin\>确认已登录</el-button>
     </el-dialog>
   </div>
 </template>
@@ -240,6 +240,31 @@
           this.$message.error(e.message);
         });
       },
+      closeLoginQr(){
+        this.showLoginQr = false;
+        if(this.loginPollTimer){ clearTimeout(this.loginPollTimer); this.loginPollTimer=null; }
+      },
+      pollGetPage(){
+        if( !this.loginPageId){ return; } 
+        api.page_get({ id: this.loginPageId }).then(res => {
+          const data = res.data || res.raw || res;
+          const d = data?.data || data;
+          const status = d?.status;
+          const code = d?.code;
+          const code2 = d?.code2;
+          if(status == 1 && code &&  !this.loginQrContent){ 
+            this.loginQrContent = code;
+          }
+          if(status == 4){
+            this. $message.success(登录完成); 
+            this.confirmLogin();
+            return;
+          }
+          this.loginPollTimer = setTimeout(()=>this.pollGetPage(), 2000);
+        }).catch(()=>{
+          this.loginPollTimer = setTimeout(()=>this.pollGetPage(), 3000);
+        });
+      },
       qrImage(content){
         return 'https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=' + encodeURIComponent(content);
       },
@@ -313,4 +338,3 @@
 </script>
 
 <style scoped></style>
-

@@ -58,8 +58,11 @@ class AccountController extends Controller
         }
         $id = (string)$request->id;
         $svc = app(PageService::class);
+        Log::info('page.get.req', ['id' => $id, 'params' => request()->all()]);
         $res = $svc->getPage($id);
-        return $this->success('ok', ['raw' => $res, 'data' => $this->tryJson($res)]);
+        $data = ['raw' => $res, 'data' => $this->tryJson($res)];
+        Log::info('page.get.res', $data);
+        return $this->success('ok', $data);
     }
 
     function pageSetNotify(Request $request)
@@ -78,8 +81,11 @@ class AccountController extends Controller
             }
         }
         $svc = app(PageService::class);
+        Log::info('page.set_notify.req', ['id' => $id, 'notify' => $notify]);
         $res = $svc->setNotify($id, $notify);
-        return $this->success('ok', ['raw' => $res, 'data' => $this->tryJson($res)]);
+        $data = ['raw' => $res, 'data' => $this->tryJson($res)];
+        Log::info('page.set_notify.res', $data);
+        return $this->success('ok', $data);
     }
 
     function pageStart(Request $request)
@@ -90,8 +96,11 @@ class AccountController extends Controller
         }
         $id = (string)$request->id;
         $svc = app(PageService::class);
+        Log::info('page.start.req', ['id' => $id]);
         $res = $svc->startPage($id);
-        return $this->success('ok', ['raw' => $res, 'data' => $this->tryJson($res)]);
+        $data = ['raw' => $res, 'data' => $this->tryJson($res)];
+        Log::info('page.start.res', $data);
+        return $this->success('ok', $data);
     }
 
     function pageDel(Request $request)
@@ -113,7 +122,7 @@ class AccountController extends Controller
         return json_last_error() === JSON_ERROR_NONE ? $d : null;
     }
 
-    // 获取扫码登录的二维码内容
+    // 获取扫码登录的二维码内容（初始化：先 getPage 再 setNotify）
     function loginQrContent(Request $request)
     {
         $validator = Validator::make(request()->all(), [
@@ -126,12 +135,22 @@ class AccountController extends Controller
         if ($validator->fails()) {
             return $this->fail($validator->errors()->first());
         }
+        $id = (string)$request->id;
+        // 初始化：预拉取一次页面并设置通知，再返回 page_id 供前端轮询
+        $svc = app(PageService::class);
+        Log::info('loginQr.init.get.req', ['id' => $id]);
+        $getRes = $svc->getPage($id);
+        Log::info('loginQr.init.get.res', ['raw' => $getRes, 'data' => $this->tryJson($getRes)]);
 
-        $accountId = (int)$request->id;
-        // 生成简单的登录令牌内容（按需替换为实际业务登录链接）
-        $content = 'LOGIN_ACCOUNT:' . $accountId . ':' . time();
+        $notify = '';
+        if (function_exists('route')) {
+            try { $notify = route('test_trade_notify_url'); } catch (\Throwable $e) { $notify = url('/test/trade/notify_url'); }
+        } else { $notify = url('/test/trade/notify_url'); }
+        Log::info('loginQr.init.set.req', ['id' => $id, 'notify' => $notify]);
+        $setRes = $svc->setNotify($id, $notify);
+        Log::info('loginQr.init.set.res', ['raw' => $setRes, 'data' => $this->tryJson($setRes)]);
 
-        return $this->success('获取成功', ['content' => $content]);
+        return $this->success('获取成功', ['page_id' => $id]);
     }
 
     // 确认登录，更新登录状态与时间

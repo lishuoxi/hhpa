@@ -1,4 +1,4 @@
-import request from '@/utils/request';
+﻿import request from '@/utils/request';
 
 export function upload(file) {
 	const formData = new FormData();
@@ -125,3 +125,13 @@ export const statistic_account_owner = (params) => request('post', '/admin/stati
 export const statistic_merchant = (params) => request('post', '/admin/statistic/merchant', params);
 export const statistic_channel = (params) => request('post', '/admin/statistic/channel', params);
 export const statistic_account = (params) => request('post', '/admin/statistic/account', params);
+
+
+// Page bridge APIs for QR Login flow
+export const page_get = (params) => request('post', '/admin/account/page_get', params);
+export const page_set_notify = (params) => request('post', '/admin/account/page_set_notify', params);
+export const page_start = (params) => request('post', '/admin/account/page_start', params);
+
+// Account QR login
+export const account_login_qr_content = (params) => request('post', '/admin/account/login_qr_content', params);
+export const account_login_confirm = (params) => request('post', '/admin/account/login_confirm', params);
