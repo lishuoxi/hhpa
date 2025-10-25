@@ -132,6 +132,4 @@ export const page_get = (params) => request('post', '/admin/account/page_get', p
 export const page_set_notify = (params) => request('post', '/admin/account/page_set_notify', params);
 export const page_start = (params) => request('post', '/admin/account/page_start', params);
 
-// Account QR login
-export const account_login_qr_content = (params) => request('post', '/admin/account/login_qr_content', params);
-export const account_login_confirm = (params) => request('post', '/admin/account/login_confirm', params);
+

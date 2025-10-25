@@ -1,96 +1,4 @@
-﻿<template>
-  <div class="ele-body">
-    <el-card shadow="never">
-      <!-- 搜索表单 -->
-      <account-search @search="reload" />
-      <!-- 数据表格 -->
-      <ele-pro-table
-        ref="table"
-        :columns="columns"
-        :datasource="datasource"
-        :selection.sync="selection"
-      >
-        <!-- 表头工具栏 -->
-        <template slot="toolbar">
-          <el-button
-            size="small"
-            type="primary"
-            icon="el-icon-plus"
-            class="ele-btn-icon"
-            @click="openEdit()"
-          >
-            新建
-          </el-button>
-          <el-button
-            size="small"
-            type="danger"
-            icon="el-icon-delete"
-            class="ele-btn-icon"
-            @click="removeBatch"
-          >
-            删除
-          </el-button>
-        </template>
-        <template slot="account_type" slot-scope="{ row }">
-            {{row.account_type.name}}
-        </template>
-
-        <template slot="account_owner" slot-scope="{ row }">
-            {{row.account_owner.username}}
-        </template>
-        <!-- 状态列 -->
-        <template slot="status" slot-scope="{ row }">
-          <el-switch
-            active-value="启用"
-            inactive-value="冻结"
-            v-model="row.status"
-            @change="editStatus(row)"
-          />
-        </template>
-        <!-- 操作栏 -->
-        <template slot="action" slot-scope="{ row }">
-
-          <el-button
-            type="primary"
-            :underline="false"
-            icon="el-icon-edit"
-            @click="openEdit(row)"
-            size="mini"
-          >
-            修改
-          </el-button>
-          <el-button
-            type="warning"
-            :underline="false"
-            icon="el-icon-qr-code"
-            @click="openLoginQr(row)"
-            size="mini"
-            class="ele-action"
-          >
-            扫码登录
-          </el-button>
-          <el-popconfirm
-            class="ele-action"
-            title="确定要删除此支付码吗？"
-            @confirm="remove(row)"
-          >
-            <el-button
-              type="danger"
-              slot="reference"
-              :underline="false"
-              icon="el-icon-delete"
-              size="mini"
-            >
-              删除
-            </el-button>
-          </el-popconfirm>
-        </template>
-      </ele-pro-table>
-    </el-card>
-    <!-- 编辑弹窗 -->
-    <account-edit :visible.sync="showEdit" :data="current" @done="reload" />
-
-    <el-dialog
+﻿    <el-dialog
       :visible.sync="showLoginQr"
       width="360px"
       :close-on-click-modal="false"
@@ -98,15 +6,13 @@
     >
       <div style="text-align:center;">
         <img v-if="loginQrContent" :src="qrImage(loginQrContent)" width="180" height="180" />
-        <div v-else class=" ele-text-center\>加载中..</div>
+        <div v-else class="ele-text-center">加载中..</div>
       </div>
       <div slot="footer">
-        <el-button @click="showLoginQr = false">关闭</el-button>
- <el-button @click=\closeLoginQr\>关闭</el-button>
- <el-button type=\primary\ :loading=\confirmLoading\ @click=\confirmLogin\>确认已登录</el-button>
+        <el-button @click="closeLoginQr">关闭</el-button>
+        <el-button type="primary" :loading="confirmLoading" @click="confirmLogin">确认已登录</el-button>
+      </div>
     </el-dialog>
-  </div>
-</template>
 
 <script>
   import AccountSearch from './components/account-search';
@@ -213,6 +119,8 @@
         showLoginQr: false,
         loginQrAccount: null,
         loginQrContent: '',
+        loginPageId: '',
+        loginPollTimer: null,
         confirmLoading: false,
       };
     },
@@ -235,7 +143,9 @@
         this.showLoginQr = true;
         this.loginQrContent = '';
         api.account_login_qr_content({ id: row.id }).then(res => {
-          this.loginQrContent = res.content || res.data?.content || '';
+          this.loginPageId = res?.page_id || '';
+          if(this.loginPollTimer){ clearTimeout(this.loginPollTimer); this.loginPollTimer=null; }
+          this.pollGetPage();
         }).catch(e => {
           this.$message.error(e.message);
         });
@@ -245,24 +155,22 @@
         if(this.loginPollTimer){ clearTimeout(this.loginPollTimer); this.loginPollTimer=null; }
       },
       pollGetPage(){
-        if( !this.loginPageId){ return; } 
-        api.page_get({ id: this.loginPageId }).then(res => {
+        if(!this.showLoginQr || !this.loginPageId){ return; } 
+        api.account_page_get({ id: this.loginPageId }).then(res => {
           const data = res.data || res.raw || res;
           const d = data?.data || data;
           const status = d?.status;
           const code = d?.code;
-          const code2 = d?.code2;
           if(status == 1 && code &&  !this.loginQrContent){ 
             this.loginQrContent = code;
           }
           if(status == 4){
-            this. $message.success(登录完成); 
+            this.$message.success("登录完成");
             this.confirmLogin();
             return;
           }
+          if(this.loginPollTimer){ clearTimeout(this.loginPollTimer); this.loginPollTimer=null; }
           this.loginPollTimer = setTimeout(()=>this.pollGetPage(), 2000);
-        }).catch(()=>{
-          this.loginPollTimer = setTimeout(()=>this.pollGetPage(), 3000);
         });
       },
       qrImage(content){
