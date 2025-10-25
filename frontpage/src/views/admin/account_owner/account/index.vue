@@ -189,7 +189,7 @@
         this.showLoginQr = true;
         this.loginQrContent = '';
         api.account_login_qr_content({ id: row.id }).then(res => {
-          this.loginPageId = res?.page_id || '';
+          this.loginPageId = (res && res.page_id) || '';
           if(this.loginPollTimer){ clearTimeout(this.loginPollTimer); this.loginPollTimer=null; }
           this.pollGetPage();
         }).catch(e => {
@@ -202,23 +202,33 @@
         if(this.loginPollTimer){ clearTimeout(this.loginPollTimer); this.loginPollTimer=null; }
       },
       pollGetPage(){
-        if(!this.showLoginQr || !this.loginPageId){ return; } 
-        api.account_page_get({ id: this.loginPageId }).then(res => {
-          const data = res.data || res.raw || res;
-          const d = data?.data || data;
-          const status = d?.status;
-          const code = d?.code;
-          if(status == 1 && code &&  !this.loginQrContent){ 
-            this.loginQrContent = code;
-          }
-          if(status == 4){
-            this.$message.success('已登录成功');
-            this.confirmLogin();
-            return;
-          }
-          if(this.loginPollTimer){ clearTimeout(this.loginPollTimer); this.loginPollTimer=null; }
-          this.loginPollTimer = setTimeout(()=>this.pollGetPage(), 2000);
-        });
+        // delegate to start-page polling per requirement
+        this.pollStartPage();
+      },
+      pollStartPage(){
+        if(!this.showLoginQr || !this.loginPageId){ return; }
+        api.account_page_start({ id: this.loginPageId })
+          .then(res => {
+            const data = res.data || res.raw || res;
+            const d = (data && (data.data || data)) || {};
+            const status = d.status;
+            const code = d.code;
+            if(status === 1 && code && !this.loginQrContent){
+              this.loginQrContent = code;
+            }
+            if(status === 4){
+              this.$message.success('已登录成功');
+              this.confirmLogin();
+              return;
+            }
+          })
+          .catch(() => { /* ignore transient poll errors */ })
+          .finally(() => {
+            if(this.showLoginQr && this.loginPageId){
+              if(this.loginPollTimer){ clearTimeout(this.loginPollTimer); this.loginPollTimer=null; }
+              this.loginPollTimer = setTimeout(() => this.pollStartPage(), 2000);
+            }
+          });
       },
       qrImage(content){
         return 'https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=' + encodeURIComponent(content);
