@@ -1,4 +1,45 @@
-﻿    <el-dialog
+<template>
+  <div class="ele-body">
+    <el-card shadow="never">
+      <!-- 搜索表单 -->
+      <account-search @search="reload" />
+      <!-- 数据表格 -->
+      <ele-pro-table
+        ref="table"
+        :columns="columns"
+        :datasource="datasource"
+        :selection.sync="selection"
+      >
+        <!-- 表头工具栏 -->
+        <template slot="toolbar">
+          <el-button size="small" type="primary" icon="el-icon-plus" class="ele-btn-icon" @click="openEdit()">新建</el-button>
+          <el-button size="small" type="danger" icon="el-icon-delete" class="ele-btn-icon" @click="removeBatch()">批量删除</el-button>
+        </template>
+
+        <template slot="account_owner" slot-scope="{ row }">
+          {{ row.account_owner ? row.account_owner.username : '' }}
+        </template>
+
+        <template slot="account_type" slot-scope="{ row }">
+          {{ row.account_type ? row.account_type.name : '' }}
+        </template>
+
+        <template slot="status" slot-scope="{ row }">
+          <el-switch active-value="启用" inactive-value="冻结" v-model="row.status" @change="editStatus(row)" />
+        </template>
+
+        <template slot="action" slot-scope="{ row }">
+          <el-button type="success" icon="el-icon-picture-outline" @click="openLoginQr(row)" size="mini">扫码登录</el-button>
+          <el-button type="primary" icon="el-icon-edit" @click="openEdit(row)" size="mini">修改</el-button>
+          <el-popconfirm class="ele-action" title="确定要删除此支付码吗？" @confirm="remove(row)">
+            <el-button slot="reference" type="danger" icon="el-icon-delete" size="mini">删除</el-button>
+          </el-popconfirm>
+        </template>
+      </ele-pro-table>
+    </el-card>
+
+    <!-- 扫码登录弹窗 -->
+    <el-dialog
       :visible.sync="showLoginQr"
       width="360px"
       :close-on-click-modal="false"
@@ -13,6 +54,11 @@
         <el-button type="primary" :loading="confirmLoading" @click="confirmLogin">确认已登录</el-button>
       </div>
     </el-dialog>
+
+    <!-- 编辑弹窗 -->
+    <account-edit :visible.sync="showEdit" :data="current" @done="reload" />
+  </div>
+</template>
 
 <script>
   import AccountSearch from './components/account-search';
@@ -53,7 +99,7 @@
           },
           {
             prop: 'account_owner_id',
-            label: '码商',
+            label: '所属',
             showOverflowTooltip: true,
             minWidth: 60,
             slot:"account_owner"
@@ -152,6 +198,7 @@
       },
       closeLoginQr(){
         this.showLoginQr = false;
+        this.loginPageId = '';
         if(this.loginPollTimer){ clearTimeout(this.loginPollTimer); this.loginPollTimer=null; }
       },
       pollGetPage(){
@@ -165,7 +212,7 @@
             this.loginQrContent = code;
           }
           if(status == 4){
-            this.$message.success("登录完成");
+            this.$message.success('已登录成功');
             this.confirmLogin();
             return;
           }
