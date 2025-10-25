@@ -39,7 +39,7 @@ class SessionController extends Controller
 		], [
 			'username.required' => '用户名不能为空',
 			'username.exists'   => '用户或密码错误',
-			'captcha.required'   => '请输入验证码',
+			'captcha.required'  => '请输入验证码',
 			'key.required'      => '数据错误',
 			'password.required' => '请输入账号密码',
 			'password.min'      => '账号密码不正确',

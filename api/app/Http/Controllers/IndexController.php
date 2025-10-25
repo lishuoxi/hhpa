@@ -65,7 +65,7 @@ class IndexController extends Controller
 
     function test(Request $request)
 	{
-		$merchant_id = 12;
+        return 'test';
 		$merchant_id = 12;
 		$channel_id = 2;
 		

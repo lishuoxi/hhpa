@@ -1,0 +1,26 @@
+root = true
+
+# Global defaults
+[*]
+charset = utf-8
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+# Frontend files (2 spaces, LF)
+[*.{js,ts,vue,json,css,scss,html,yml,yaml,md}]
+indent_style = space
+indent_size = 2
+end_of_line = lf
+
+# PHP and INI (4 spaces, LF)
+[*.{php,ini}]
+indent_style = space
+indent_size = 4
+end_of_line = lf
+
+# PowerShell scripts on Windows (CRLF)
+[*.ps1]
+indent_style = space
+indent_size = 2
+end_of_line = crlf
+

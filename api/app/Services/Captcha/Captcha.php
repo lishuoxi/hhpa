@@ -2,6 +2,7 @@
 
 namespace App\Services\Captcha;
 
+use Log;
 use Cache;
 
 /**
@@ -81,6 +82,10 @@ class Captcha
         if (empty($this->uniqid)) {
             $this->uniqid = 'LoginCaptcha';
         }
+        /*
+        Log::info('make code key');
+        Log::info($this->uniqid);
+        */
         
         if ($this->type == 'math') {
             $x = random_int(1, 50);
@@ -109,9 +114,14 @@ class Captcha
             // 缓存验证码字符串
             Cache::put($this->uniqid, $this->code, 3*60);
         }
+
+        /*
+        Log::info('code');
+        Log::info($this->code);
+        */
         
-        // 设置字体文件路径
-        $this->font = __DIR__ . '/icon.ttf';
+        // 解析可用字体文件，避免特殊字体映射导致字符错位
+        $this->font = $this->font ?: $this->resolveFontFile();
         
         return $this;
     }
@@ -122,6 +132,10 @@ class Captcha
      */
     public function showImage()
     {
+        // 禁止缓存，避免旧图缓存导致图像与缓存不一致
+        @header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+        @header('Pragma: no-cache');
+        @header('Expires: 0');
         // 生成背景
         $this->img = imagecreatetruecolor($this->width, $this->height);
         $color = imagecolorallocate($this->img, mt_rand(220, 255), mt_rand(220, 255), mt_rand(220, 255));
@@ -143,18 +157,46 @@ class Captcha
         $_x = $this->width / $this->codelen;
         for ($i = 0; $i < $this->codelen; $i++) {
             $this->fontcolor = imagecolorallocate($this->img, mt_rand(0, 156), mt_rand(0, 156), mt_rand(0, 156));
-            
+
             $x = intval($_x * $i + mt_rand(1, 5));
             $y = intval($this->height / 1.4);
             $angle = ($this->type == 'math') ? 0 : mt_rand(-30, 30);
-            
-            imagettftext($this->img, $this->fontsize, $angle, $x, $y, $this->fontcolor, $this->font, $this->code[$i]);
+
+            $char = substr($this->code, $i, 1);
+            if (!empty($this->font) && file_exists($this->font)) {
+                imagettftext($this->img, $this->fontsize, $angle, $x, $y, $this->fontcolor, $this->font, $char);
+            } else {
+                // Fallback 内置字体
+                imagestring($this->img, 5, $x, $y - 20, $char, $this->fontcolor);
+            }
         }
         
+        //Log::info('show image code');
+        //Log::info($this->code);
         ob_clean();
         header('Content-Type: image/png');
         imagepng($this->img);
         imagedestroy($this->img);
+    }
+
+    private function resolveFontFile()
+    {
+        $candidates = [
+            'C:/Windows/Fonts/arial.ttf',
+            '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',
+            '/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf',
+            '/System/Library/Fonts/Supplemental/Arial.ttf',
+            __DIR__ . '/captcha.ttf',
+            __DIR__ . '/arial.ttf',
+            __DIR__ . '/DejaVuSans.ttf',
+            __DIR__ . '/icon.ttf',
+        ];
+        foreach ($candidates as $font) {
+            if (@file_exists($font)) {
+                return $font;
+            }
+        }
+        return '';
     }
     
     /**
@@ -170,6 +212,15 @@ class Captcha
         }
         
         $val = Cache::get($uniqid); // 获取
+        
+        /*
+        Log::info('uniqid');
+        Log::info($uniqid);
+        Log::info('cache code');
+        Log::info($val);
+        Log::info('request code');
+        Log::info($code);
+        */
         return is_string($val) && strtolower($val) === strtolower($code);
     }
 }

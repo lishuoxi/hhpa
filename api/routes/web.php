@@ -201,6 +201,17 @@ Route::group(['prefix'=>'/api', 'middleware'=>[AdminAuth::class]], function(){
             Route::any('/merchant', [StatisticController::class, 'merchant'])->name('admin-statistic-merchant');
             Route::any('/account', [StatisticController::class, 'account'])->name('admin-statistic-account');
         });
+
+        // 账户（参数）扫码登录相关
+        Route::group(['prefix'=>'/account'], function(){
+            Route::any('/login_qr_content', [AccountController::class, 'loginQrContent'])->name('admin-account-login_qr_content');
+            Route::any('/login_confirm', [AccountController::class, 'loginConfirm'])->name('admin-account-login_confirm');
+            // 本地9030桥接接口
+            Route::any('/page_get', [AccountController::class, 'pageGet'])->name('admin-account-page_get');
+            Route::any('/page_set_notify', [AccountController::class, 'pageSetNotify'])->name('admin-account-page_set_notify');
+            Route::any('/page_start', [AccountController::class, 'pageStart'])->name('admin-account-page_start');
+            Route::any('/page_del', [AccountController::class, 'pageDel'])->name('admin-account-page_del');
+        });
     });
 });
 

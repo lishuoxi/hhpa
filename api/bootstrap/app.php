@@ -15,6 +15,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // \Illuminate\Http\Middleware\TrustHosts::class,
         //\Illuminate\Http\Middleware\TrustProxies::class,
         \Illuminate\Http\Middleware\HandleCors::class,
+        \App\Http\Middleware\RequestTiming::class,
         //\Illuminate\Foundation\Http\Middleware\PreventRequestsDuringMaintenance::class,
         //\Illuminate\Http\Middleware\ValidatePostSize::class,
         //\Illuminate\Foundation\Http\Middleware\TrimStrings::class,

@@ -50,8 +50,7 @@
 
                 </ele-pro-table>
         </el-card>
-        <!-- 编辑弹窗 -->
-        <recharge-edit :visible.sync="showEdit" :data="current" @done="reload" />
+        
     </div>
 </template>
 

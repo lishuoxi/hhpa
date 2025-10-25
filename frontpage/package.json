@@ -29,6 +29,7 @@
     "element-ui": "2.15.7",
     "github-markdown-css": "^5.1.0",
     "jsbarcode": "^3.11.5",
+    "jsqr": "^1.4.0",
     "nprogress": "^0.2.0",
     "tinymce": "^5.10.5",
     "vue": "^2.7.10",

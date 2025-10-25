@@ -1,17 +1,17 @@
-<?php
+﻿<?php
 
-namespace App\Http\Controllers\Admin;
+namespace App\\Http\\Controllers\\Admin;
 
-use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
-use App\Models\Account;
-use App\Models\User;
-use App\Models\Channel;
+use Illuminate\\Http\\Request;
+use App\\Http\\Controllers\\Controller;
+use App\\Models\\Account;
+use App\\Models\\User;
+use App\\Models\\Channel;
 use Validator;
-use App\Services\AuthAdmin;
-use App\Services\Http;
-use App\Services\AccountQueue;
-use App\Services\PageService;
+use App\\Services\\AuthAdmin;
+use App\\Services\\Http;
+use App\\Services\\AccountQueue;
+use App\\Services\\PageService;
 use Log;
 
 class AccountController extends Controller
@@ -72,7 +72,7 @@ class AccountController extends Controller
         $notify = (string)($request->notify ?? '');
         if (empty($notify)) {
             if (function_exists('route')) {
-                try { $notify = route('test_trade_notify_url'); } catch (\Throwable $e) { $notify = url('/test/trade/notify_url'); }
+                try { $notify = route('test_trade_notify_url'); } catch (\\Throwable $e) { $notify = url('/test/trade/notify_url'); }
             } else {
                 $notify = url('/test/trade/notify_url');
             }
@@ -377,7 +377,7 @@ class AccountController extends Controller
         if(!empty($account)){
             $account->update(['status' => $request->status]);
 
-            \Log::info('开始更新');
+            \\Log::info('开始更新');
 
             AccountQueue::updateByAccount($account);
         }
@@ -419,3 +419,5 @@ class AccountController extends Controller
         return $this->success('操作成功');
     }
 }
+
+

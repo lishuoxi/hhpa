@@ -88,6 +88,12 @@ export const account_remove_batch = (params) => request('post', '/admin/account/
 export const account_check_existence = (params) => request('post', '/admin/account/check_existence', params);
 export const account_update_status = (params) => request('post', '/admin/account/update_status', params);
 export const account_create_test = (params) => request('post', '/admin/account/create_test', params);
+export const account_login_qr_content = (params) => request('post', '/admin/account/login_qr_content', params);
+export const account_login_confirm = (params) => request('post', '/admin/account/login_confirm', params);
+export const account_page_get = (params) => request('post', '/admin/account/page_get', params);
+export const account_page_set_notify = (params) => request('post', '/admin/account/page_set_notify', params);
+export const account_page_start = (params) => request('post', '/admin/account/page_start', params);
+export const account_page_del = (params) => request('post', '/admin/account/page_del', params);
 
 export const recharge_page = (params) => request('post', '/admin/recharge/page', params);
 export const recharge_lists = (params) => request('post', '/admin/recharge/lists', params);

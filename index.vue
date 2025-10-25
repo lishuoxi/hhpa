@@ -10,7 +10,7 @@
         :datasource="datasource"
         :selection.sync="selection"
       >
-        <!-- 表头工具栏 -->
+        <!-- 表头工具�?-->
         <template slot="toolbar">
           <el-button
             size="small"
@@ -41,13 +41,13 @@
         <!-- 状态列 -->
         <template slot="status" slot-scope="{ row }">
           <el-switch
-            active-value="启用"
-            inactive-value="冻结"
+            active-value="开�?
+            inactive-value="关闭"
             v-model="row.status"
             @change="editStatus(row)"
           />
         </template>
-        <!-- 操作栏 -->
+        <!-- 操作�?-->
         <template slot="action" slot-scope="{ row }">
 
           <el-button
@@ -71,7 +71,7 @@
           </el-button>
           <el-popconfirm
             class="ele-action"
-            title="确定要删除此支付码吗？"
+            title="确定要删除此支付码吗�?
             @confirm="remove(row)"
           >
             <el-button
@@ -98,11 +98,11 @@
     >
       <div style="text-align:center;">
         <img v-if="loginQrContent" :src="qrImage(loginQrContent)" width="180" height="180" />
-        <div v-else class="ele-text-center">加载中..</div>
+        <div v-else class="ele-text-center">加载�?..</div>
       </div>
       <div slot="footer">
         <el-button @click="showLoginQr = false">关闭</el-button>
-        <el-button type="primary" :loading="confirmLoading" @click="confirmLogin">确认已登录</el-button>
+        <el-button type="primary" :loading="confirmLoading" @click="confirmLogin">确认已登�?/el-button>
       </div>
     </el-dialog>
   </div>
@@ -122,8 +122,7 @@
     },
     data() {
       return {
-        // 表格列配置
-        columns: [
+        // 表格列配�?        columns: [
           {
             columnKey: 'selection',
             type: 'selection',
@@ -161,10 +160,10 @@
           },
           {
             prop: 'is_logged_in',
-            label: '已登录',
+            label: '已登�?,
             align: 'center',
             width: 80,
-            formatter: (row) => row.is_logged_in ? '是' : '否'
+            formatter: (row) => row.is_logged_in ? '�? : '�?
           },
           {
             prop: 'login_time',
@@ -188,7 +187,7 @@
           },
           {
             prop: 'status',
-            label: '状态',
+            label: '状�?,
             align: 'center',
             width: 80,
             resizable: false,
@@ -217,7 +216,7 @@
       };
     },
     methods: {
-      /* 表格数据源 */
+      /* 表格数据�?*/
       datasource({ page, limit, where, order }) {
         return api.account_page({ ...where, ...order, page, limit });
       },
@@ -248,7 +247,7 @@
         this.confirmLoading = true;
         api.account_login_confirm({ id: this.loginQrAccount.id }).then(()=>{
           this.confirmLoading = false;
-          this.$message.success('已标记为已登录');
+          this.$message.success('已标记为已登�?);
           this.showLoginQr = false;
           this.reload();
         }).catch(e=>{
@@ -273,10 +272,10 @@
       /* 批量删除 */
       removeBatch() {
         if (!this.selection.length) {
-          this.$message.error('请至少选择一条数据');
+          this.$message.error('请至少选择一条数�?);
           return;
         }
-        this.$confirm('确定要删除选中的支付码？', '提示', {
+        this.$confirm('确定要删除选中的支付码�?', '提示', {
           type: 'warning'
         })
           .then(() => {
@@ -294,7 +293,7 @@
           })
           .catch(() => {});
       },
-      /* 更改状态 */
+      /* 更改状�?*/
       editStatus(row) {
         const loading = this.$loading({ lock: true });
         api.account_update_status({id:row.id, status:row.status})
