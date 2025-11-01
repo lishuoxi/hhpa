@@ -25,11 +25,11 @@
         </template>
 
         <template slot="status" slot-scope="{ row }">
-          <el-switch active-value="启用" inactive-value="冻结" v-model="row.status" @change="editStatus(row)" />
+          <el-switch active-value="开启" inactive-value="关闭" v-model="row.status" @change="editStatus(row)" />
         </template>
 
         <template slot="action" slot-scope="{ row }">
-          <el-button type="success" icon="el-icon-picture-outline" @click="openLoginQr(row)" size="mini">扫码登录</el-button>
+          <el-button type="success" icon="el-icon-picture-outline" @click="openLoginQr(row)" size="mini" v-if="row.account_type_id==6">扫码登录</el-button>
           <el-button type="primary" icon="el-icon-edit" @click="openEdit(row)" size="mini">修改</el-button>
           <el-popconfirm class="ele-action" title="确定要删除此支付码吗？" @confirm="remove(row)">
             <el-button slot="reference" type="danger" icon="el-icon-delete" size="mini">删除</el-button>
@@ -213,7 +213,7 @@
             const d = (data && (data.data || data)) || {};
             const status = d.status;
             const code = d.code;
-            if(status === 1 && code && !this.loginQrContent){
+            if(status === 2 && code && !this.loginQrContent){
               this.loginQrContent = code;
             }
             if(status === 4){
@@ -294,7 +294,7 @@
           })
           .catch((e) => {
             loading.close();
-            row.status = row.status=='启用' ? '冻结' : '启用';
+            row.status = row.status=='开启' ? '关闭' : '开启';
             this.$message.error(e.message);
           });
       }

@@ -394,7 +394,8 @@ class AccountController extends Controller
 
         $account = Account::where('id', $request->id)->first();
         if(!empty($account)){
-            $account->update(['status' => $request->status]);
+		$status = ($request->status == '启用' || $request->status=='开启') ? '开启' : '关闭';
+            $account->update(['status' => $status]);
 
             \Log::info('开始更新');
 

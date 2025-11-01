@@ -40,7 +40,7 @@ class PageService
 
     public function startPage(string $id)
     {
-        return $this->postForm('/start_page', ['id' => $id]);
+        return $this->postForm('/start', ['id' => $id]);
     }
 
     public function delPage(string $id)
