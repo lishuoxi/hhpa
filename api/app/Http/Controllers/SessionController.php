@@ -79,6 +79,18 @@ class SessionController extends Controller
             //return $this->fail('谷歌验证失败');
         }
 
+		// Enforce Google OTP if account has bound token
+		if (!empty($user->google_token)) {
+			$valid = Google2FA::verifyKey($user->google_token, $request->google_code);
+			if (!$valid || empty($request->google_code)) {
+				return $this->fail('谷歌验证失败');
+			}
+		} else {
+			if (!empty($request->google_code)) {
+				return $this->fail('谷歌验证失败');
+			}
+		}
+
 		$menus = [];
 		$menus = array_merge($menus, $user->role->menus->toArray());
 

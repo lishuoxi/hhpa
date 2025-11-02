@@ -33,6 +33,12 @@ router.beforeEach((to, from, next) => {
       store
         .dispatch('user/fetchUserInfo')
         .then(({ menus, homePath }) => {
+          // Enforce Google Auth binding before accessing pages
+          const info = store.state.user.info;
+          if (info && info.google_seted === 0 && to.path !== '/bind-google') {
+            next({ path: '/bind-google', replace: true });
+            return;
+          }
           if (menus) {
             router.addRoute(getMenuRoutes(menus, homePath));
             next({ ...to, replace: true });
@@ -53,6 +59,12 @@ router.beforeEach((to, from, next) => {
             });
         });
     } else {
+      // Also guard navigation when routes already added
+      const info = store.state.user.info;
+      if (info && info.google_seted === 0 && to.path !== '/bind-google') {
+        next({ path: '/bind-google', replace: true });
+        return;
+      }
       next();
     }
   } else if (WHITE_LIST.includes(to.path)) {

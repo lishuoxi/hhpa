@@ -30,6 +30,11 @@ export const routes = [
     component: () => import('@/views/login/index.vue'),
     meta: { title: '登录' }
   },
+  {
+    path: '/bind-google',
+    component: () => import('@/views/google/bind.vue'),
+    meta: { title: '绑定谷歌验证码' }
+  },
   /*{
     path: '/forget',
     component: () => import('@/views/forget/index.vue'),

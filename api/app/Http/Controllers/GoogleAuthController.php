@@ -52,6 +52,8 @@ class GoogleAuthController extends Controller
 
         $google_code = Google2FA::generateSecretKey();
         $google_code_url = Google2FA::getQRCodeUrl('hello:'.$admin->username, $admin->username.'@hello.com', $google_code);
+        // 生成本地二维码(Base64 DataURL)，避免依赖外部服务
+        $google_code_qr = Google2FA::getQRCodeInline('hello:'.$admin->username, $admin->username.'@hello.com', $google_code);
 
         //$qrcode  = QrCode::size(120)->style('round')->generate($google_code);
         //var_dump($qrcode);
@@ -59,6 +61,7 @@ class GoogleAuthController extends Controller
         return $this->success('', [
             'google_code'     => $google_code,
             'google_code_url' => $google_code_url,
+            'google_code_qr'  => $google_code_qr,
         ]);
 	}
 }

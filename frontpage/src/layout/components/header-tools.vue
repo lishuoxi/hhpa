@@ -33,6 +33,9 @@
             <el-dropdown-item command="password" icon="el-icon-key">
               {{ $t('layout.header.password') }}
             </el-dropdown-item>
+            <el-dropdown-item command="bind-google" icon="el-icon-mobile-phone">
+              绑定/更换谷歌验证
+            </el-dropdown-item>
             <el-dropdown-item
               command="logout"
               icon="el-icon-switch-button"
@@ -90,6 +93,10 @@
         } else if (command === 'profile') {
           if (this.$route.fullPath !== '/user/profile') {
             this.$router.push('/user/profile');
+          }
+        } else if (command === 'bind-google') {
+          if (this.$route.fullPath !== '/bind-google') {
+            this.$router.push('/bind-google');
           }
         } else if (command === 'logout') {
           // 退出登录
