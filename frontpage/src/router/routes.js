@@ -32,8 +32,14 @@ export const routes = [
   },
   {
     path: '/bind-google',
-    component: () => import('@/views/google/bind.vue'),
-    meta: { title: '绑定谷歌验证码' }
+    component: EleLayout,
+    children: [
+      {
+        path: '',
+        component: () => import('@/views/google/bind.vue'),
+        meta: { title: '绑定谷歌验证码' }
+      }
+    ]
   },
   /*{
     path: '/forget',
