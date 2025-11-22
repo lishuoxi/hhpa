@@ -25,8 +25,8 @@ class DataClear extends Command
     public function handle()
     {
         Log::info('run-data-clear');
-        $path = Storage::path(create_id().'.sql');
-		shell_exec('mysqldump -uroot -pLIli327847@ pay > '.$path);
+        //$path = Storage::path(create_id().'.sql');
+		//shell_exec('mysqldump -uroot -pLIli327847@ pay > '.$path);
 
         $days = $this->argument('days');
 
